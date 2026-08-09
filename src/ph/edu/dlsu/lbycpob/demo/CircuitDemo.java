@@ -14,6 +14,8 @@ public class CircuitDemo {
         singleGateDemo();
 
         halfAdderDemo();
+
+        fullAdderDemo();
     }
 
     private static void singleGateDemo() {
@@ -149,5 +151,73 @@ public class CircuitDemo {
 
         System.out.println("\nHalf Adder Truth Table:");
         TruthTableRunner.run(halfAdder);
+    }
+
+    private static void fullAdderDemo() {
+
+        System.out.println("================================");
+        System.out.println("          FULL ADDER");
+        System.out.println("================================");
+
+        // Input wires
+        Wire wireA = new Wire("A");
+        Wire wireB = new Wire("B");
+        Wire wireCin = new Wire("Cin");
+
+        // Intermediate wires
+        Wire xor1Output = new Wire("XOR1");
+        Wire and1Output = new Wire("AND1");
+        Wire and2Output = new Wire("AND2");
+
+        // Final outputs
+        Wire sum = new Wire("SUM");
+        Wire carry = new Wire("COUT");
+
+        // Input pins
+        InputPin pinA = new InputPin("A", wireA);
+        InputPin pinB = new InputPin("B", wireB);
+        InputPin pinCin = new InputPin("Cin", wireCin);
+
+        Circuit fullAdder = new Circuit("Full Adder");
+
+        /*
+         * Full Adder logic:
+         *
+         * X1   = A XOR B
+         * SUM  = X1 XOR Cin
+         * C1   = A AND B
+         * C2   = X1 AND Cin
+         * COUT = C1 OR C2
+         */
+
+        fullAdder
+                .add(pinA)
+                .add(pinB)
+                .add(pinCin)
+
+                .add(new XORGate(wireA, wireB, xor1Output))
+                .add(new XORGate(xor1Output, wireCin, sum))
+
+                .add(new ANDGate(wireA, wireB, and1Output))
+                .add(new ANDGate(xor1Output, wireCin, and2Output))
+
+                .add(new ORGate(and1Output, and2Output, carry))
+
+                .add(new OutputProbe("SUM", sum))
+                .add(new OutputProbe("COUT", carry));
+
+        // Required test case: A=1, B=1, Cin=1
+        pinA.setValue(true);
+        pinB.setValue(true);
+        pinCin.setValue(true);
+
+        System.out.println("Testing A=1, B=1, Cin=1:");
+
+        fullAdder.evaluate();
+
+        System.out.println("Expected: SUM=1, COUT=1");
+
+        System.out.println("\nFull Adder Truth Table:");
+        TruthTableRunner.run(fullAdder);
     }
 }
